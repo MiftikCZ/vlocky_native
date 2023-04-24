@@ -22,9 +22,10 @@ class Recipe {
   final String? name;
   final String? description;
   final String? cas;
+  final String? zpusob;
   final List<String>? postup;
 
-  Recipe({this.name, this.description, this.cas, this.postup});
+  Recipe({this.name, this.description, this.cas, this.zpusob, this.postup});
 }
 
 class MainApp extends StatefulWidget {
@@ -54,32 +55,22 @@ class MainAppState extends State<MainApp> {
       // Get the JSON data
       List<String> mineResponse = response.body.split("\n");
       mineResponse.removeAt(0);
-      var newResponse = json.decode("[" + mineResponse.join(""));
+      var newResponse = json.decode("[${mineResponse.join("")}");
       vlockyRecepty = List<Recipe>.from(newResponse
               .map((el) => Recipe(
                   name: el["title"],
                   description: el["description"],
                   cas: el["time"],
+                  zpusob: el["type"],
                   postup: List<String>.from(el["recept"].toList()).toList()))
               .toList())
           .toList();
-      //data = json.decode(response.body)['recepty'];
     });
 
     return "Successfull";
   }
 
-  List<Recipe> vlockyRecepty = [
-    Recipe(
-        name: 'Banán s nuttelou',
-        cas: "3-4min",
-        description: 'Nejlepší kombinace! :)',
-        postup: ["40g vloček", "1/2 banánu"]),
-    Recipe(name: 'Štrůdl', description: 'se skořicovým cukrem'),
-    Recipe(
-        name: 'Domácí mussli',
-        description: 'Orestované na pánvi a 100% křupavé'),
-  ];
+  List<Recipe> vlockyRecepty = [];
 
   Widget _receptItem({required int index}) {
     return ListTile(
@@ -95,31 +86,31 @@ class MainAppState extends State<MainApp> {
 
   Widget _drawer() {
     return Drawer(
-      child: SizedBox(
-        height: 12000,
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.black38,
-              ),
-              child: Center(child: Text('Objevuj recepty')),
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.black38,
             ),
-            SizedBox(
-              height: 700,
-              child: ListView.separated(
-                separatorBuilder: (context, index) => const Divider(),
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: vlockyRecepty.length,
-                itemBuilder: (context, index) {
-                  return _receptItem(index: index);
-                },
-              ),
-            )
-          ],
-        ),
+            child: Center(child: Text('Objevuj recepty')),
+          ),
+          vlockyRecepty.isEmpty
+              ? const Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Center(child: CircularProgressIndicator()))
+              : SizedBox(
+                  height: 700,
+                  child: ListView.separated(
+                    separatorBuilder: (context, index) => const Divider(),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: vlockyRecepty.length,
+                    itemBuilder: (context, index) {
+                      return _receptItem(index: index);
+                    },
+                  ),
+                )
+        ],
       ),
     );
   }
@@ -145,63 +136,74 @@ class MainAppState extends State<MainApp> {
             : Text(_selectedRecipe?.name ?? "bez názvu"),
         centerTitle: true,
       ),
-      body: _selectedRecipe == null
-          ? const Text("Vyber si jakýkoliv recept z nabídky vlevo!")
-          : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _receptInfoWidget(
-                  top: "Popisek",
-                  bottom: Text(
-                    _selectedRecipe?.description ?? "bez popisku",
-                    style: const TextStyle(fontSize: _receptTextSize),
-                    textAlign: TextAlign.start,
-                  )),
-              const Divider(),
-              _receptInfoWidget(
-                  top: "Čas",
-                  bottom: Text(
-                    _selectedRecipe?.cas ?? "?",
-                    style: const TextStyle(fontSize: _receptTextSize),
-                    textAlign: TextAlign.start,
-                  )),
-              const Divider(),
-              _receptInfoWidget(
-                  top: "Postup",
-                  bottom: Column(
-                      children: _selectedRecipe!.postup != null
-                          ? _selectedRecipe!.postup!.map((String name) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      "\u2022 ",
-                                      style: TextStyle(
-                                          fontSize: 18, color: Colors.white38),
+      body: Container(
+          child: _selectedRecipe == null
+              ? const Text("Vyber si jakýkoliv recept z nabídky vlevo!")
+              : ListView(children: [
+                  _receptInfoWidget(
+                      top: "Popisek",
+                      bottom: Text(
+                        _selectedRecipe?.description ?? "bez popisku",
+                        style: const TextStyle(fontSize: _receptTextSize),
+                        textAlign: TextAlign.start,
+                      )),
+                  const Divider(),
+                  _receptInfoWidget(
+                      top: "Čas",
+                      bottom: Text(
+                        _selectedRecipe?.cas ?? "?",
+                        style: const TextStyle(fontSize: _receptTextSize),
+                        textAlign: TextAlign.start,
+                      )),
+                  const Divider(),
+                  _receptInfoWidget(
+                      top: "Způsob",
+                      bottom: Text(
+                        _selectedRecipe?.zpusob ?? "dobré vločky",
+                        style: const TextStyle(fontSize: _receptTextSize),
+                        textAlign: TextAlign.start,
+                      )),
+                  const Divider(),
+                  _receptInfoWidget(
+                      top: "Postup",
+                      bottom: Column(
+                          children: _selectedRecipe!.postup != null
+                              ? _selectedRecipe!.postup!.map((String name) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          "\u2022 ",
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              color: Colors.white38),
+                                        ),
+                                        Expanded(
+                                            child: Text(
+                                          name,
+                                          style: TextStyle(
+                                              color: name.startsWith("*")
+                                                  ? Colors.white70
+                                                  : null,
+                                              fontSize: _receptTextSize),
+                                          textAlign: TextAlign.start,
+                                        ))
+                                      ],
                                     ),
-                                    Expanded(
-                                        child: Text(
-                                      name,
-                                      style: TextStyle(
-                                          color: name.startsWith("*")
-                                              ? Colors.white70
-                                              : null,
-                                          fontSize: _receptTextSize),
-                                      textAlign: TextAlign.start,
-                                    ))
-                                  ],
-                                ),
-                              );
-                            }).toList()
-                          : [
-                              const Text(
-                                "?",
-                                style: TextStyle(fontSize: _receptTextSize),
-                                textAlign: TextAlign.start,
-                              )
-                            ])),
-              //const Divider(),
-            ]),
+                                  );
+                                }).toList()
+                              : [
+                                  const Text(
+                                    "?",
+                                    style: TextStyle(fontSize: _receptTextSize),
+                                    textAlign: TextAlign.start,
+                                  )
+                                ])),
+                  //const Divider(),
+                ])),
     );
   }
 
