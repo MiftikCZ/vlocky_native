@@ -55,7 +55,7 @@ class MainAppState extends State<MainApp> {
       // Get the JSON data
       List<String> mineResponse = response.body.split("\n");
       mineResponse.removeAt(0);
-      var newResponse = json.decode("[${mineResponse.join("")}");
+      var newResponse = json.decode("[" + mineResponse.join(""));
       vlockyRecepty = List<Recipe>.from(newResponse
               .map((el) => Recipe(
                   name: el["title"],
@@ -86,31 +86,42 @@ class MainAppState extends State<MainApp> {
 
   Widget _drawer() {
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.black38,
+      child: SizedBox.expand(
+        child: ListView(
+          shrinkWrap: true,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.black38,
+              ),
+              child: Center(child: Text('Objevuj recepty')),
             ),
-            child: Center(child: Text('Objevuj recepty')),
-          ),
-          vlockyRecepty.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.all(10.0),
-                  child: Center(child: CircularProgressIndicator()))
-              : SizedBox(
-                  height: 700,
-                  child: ListView.separated(
-                    separatorBuilder: (context, index) => const Divider(),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: vlockyRecepty.length,
-                    itemBuilder: (context, index) {
-                      return _receptItem(index: index);
-                    },
-                  ),
-                )
-        ],
+            vlockyRecepty.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Center(child: CircularProgressIndicator()))
+                : LimitedBox(
+                    maxHeight: 500,
+
+                    //constraints: BoxConstraints.expand(),
+                    //height: 700,
+                    child: SingleChildScrollView(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        //separatorBuilder: (context, index) => const Divider(),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: vlockyRecepty.length,
+                        padding: EdgeInsets.zero,
+                        itemBuilder: (context, index) {
+                          return _receptItem(index: index);
+                        },
+                      ),
+                    ),
+                  )
+          ],
+        ),
       ),
     );
   }
@@ -138,7 +149,10 @@ class MainAppState extends State<MainApp> {
       ),
       body: Container(
           child: _selectedRecipe == null
-              ? const Text("Vyber si jakýkoliv recept z nabídky vlevo!")
+              ? const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("Vyber si jakýkoliv recept z nabídky vlevo!"),
+                )
               : ListView(children: [
                   _receptInfoWidget(
                       top: "Popisek",
