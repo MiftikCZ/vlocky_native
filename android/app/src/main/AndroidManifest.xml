@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="tk.miftik.vlocky_native">
+    package="com.example.vlocky_native">
    <application
         android:label="Vločky recepty"
         android:name="${applicationName}"
